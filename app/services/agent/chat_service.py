@@ -9,18 +9,17 @@ from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, System
 from langgraph.errors import GraphRecursionError
 from sqlalchemy.orm import Session
 
-from app.agents.chat_graph import (
-    ROUTER_ROUTE_ORDER,
-    TOOL_ROUTE_ORDER,
-    _coerce_tool_result,
-    build_agent_graph,
-)
-from app.agents.chat_prompts import (
+from app.agents.chat.context_prompts import (
     DEFAULT_SYSTEM_PROMPT,
     build_attachment_registry_context_block,
     build_selected_topics_context_block,
     build_upload_context_block,
 )
+from app.agents.chat.graph import (
+    _coerce_tool_result,
+    build_agent_graph,
+)
+from app.agents.chat.tool_routes import ROUTER_ROUTE_ORDER, TOOL_ROUTE_ORDER
 from app.schemas.agent import AgentChatMessage, AgentChatRequest, AgentSSEEvent
 from app.services.ai.query_rewrite_service import rewrite_agent_request
 

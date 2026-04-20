@@ -11,9 +11,12 @@ This project keeps the existing FastAPI interfaces stable while moving agent and
 
 ## Agent Boundaries
 
-- `app/agents/chat_graph.py` owns the LangGraph state machine, tool routing, tool execution, and LLM binding.
-- `app/agents/chat_prompts.py` owns the system prompt and context blocks for selected topics, current uploads, and historical attachments.
-- `app/services/agent_chat_service.py` only translates API requests into LangChain messages and streams LangGraph updates as SSE events.
+- `app/agents/chat/graph.py` owns the LangGraph state machine, router/specialist agent orchestration, delegate tool execution, and LLM binding.
+- `app/agents/chat/context_prompts.py` owns user-session context blocks for selected topics, current uploads, and historical attachments.
+- `app/agents/chat/agent_prompts.py` owns router/specialist orchestration prompts.
+- `app/agents/chat/profiles.py` owns specialist agent profiles and tool-set ownership.
+- `app/agents/chat/tool_routes.py` owns shared tool route constants.
+- `app/services/agent/chat_service.py` only translates API requests into LangChain messages and streams LangGraph updates as SSE events.
 - `app/agents/toolkit.py` owns tool definitions and adapts application services to LangChain `StructuredTool`.
 
 Tool failures are converted into `ToolMessage(status="error")`. If a DB-backed tool raises, the graph executor rolls back the SQLAlchemy session before continuing.

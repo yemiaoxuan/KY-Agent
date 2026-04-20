@@ -22,10 +22,18 @@
 
 ### LangChain / LangGraph 部分
 
-- `app/agents/chat_graph.py`
-  - LangGraph 状态机、工具路由、工具执行、LLM 绑定。
-- `app/agents/chat_prompts.py`
-  - Agent 系统提示词、上传上下文、历史附件上下文。
+- `app/agents/chat/`
+  - 对话 Agent 子包，承载会话图、分层 agent 配置和聊天上下文定义。
+- `app/agents/chat/graph.py`
+  - LangGraph 状态机、一级 router agent、二级 specialist agent、委派工具执行、LLM 绑定。
+- `app/agents/chat/context_prompts.py`
+  - 用户会话上下文定义：默认聊天提示词、选中主题、上传文件、历史附件上下文。
+- `app/agents/chat/agent_prompts.py`
+  - Agent 编排层提示词：一级 router 和二级 specialist 的职责边界。
+- `app/agents/chat/profiles.py`
+  - 二级 specialist agent 的 profile：能力边界、工具集归属、委派描述。
+- `app/agents/chat/tool_routes.py`
+  - 工具名集合和工具执行路由常量，供 graph 与 profile 共享，避免循环依赖。
 - `app/agents/toolkit.py`
   - LangChain `StructuredTool` 适配层。
 - `app/services/agent/chat_service.py`
@@ -42,6 +50,13 @@
   - 基于 LangChain prompt/runnable/parser 的 RAG chain。
 - `app/services/ai/query_rewrite_service.py`
   - Agent 请求重写链。
+
+### 对话 Agent 分层
+
+- 一级 router agent 只负责路由和规划，只绑定 `delegate_to_*_agent` 委派工具，不直接绑定业务工具全集。
+- 二级 specialist agent 按 `app/agents/chat/profiles.py` 中的 profile 绑定自己的工具子集，例如 `research`、`reporting`、`communication`、`vision`、`utility`。
+- 用户侧上下文由 `app/agents/chat/context_prompts.py` 构造，保持和 agent 编排层解耦。
+- 新增业务工具时，先在 `app/agents/toolkit.py` 暴露工具，再在 `app/agents/chat/profiles.py` 分配给对应 specialist；如需新增领域，新增一个 profile 即可。
 
 ### 服务模块分层
 

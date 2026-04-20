@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
 from typing import Annotated, Any, TypedDict
 
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage, ToolMessage
@@ -9,174 +8,17 @@ from langchain_core.tools import BaseTool, StructuredTool
 from langgraph.graph import END, StateGraph, add_messages
 from sqlalchemy.orm import Session
 
+from app.agents.chat.agent_prompts import ROUTER_SYSTEM_PROMPT, SPECIALIST_SYSTEM_PROMPT_TEMPLATE
+from app.agents.chat.profiles import AGENT_TOOL_PROFILES, AgentToolProfile
+from app.agents.chat.tool_routes import (
+    ANSWER_TOOL_NAMES,
+    ROUTER_ROUTE_ORDER,
+    SEARCH_TOOL_NAMES,
+    TOOL_ROUTE_BY_NAME,
+    TOOL_ROUTE_ORDER,
+)
 from app.agents.toolkit import build_agent_tools
 from app.services.ai.llm_service import get_llm
-
-SEARCH_TOOL_NAMES = {"semantic_search_public_progress"}
-ANSWER_TOOL_NAMES = {"rag_answer_public_progress"}
-REPORT_TOOL_NAMES = {"list_reports", "get_report_content"}
-EMAIL_TOOL_NAMES = {"send_markdown_email", "send_report_email", "send_plain_email"}
-DAILY_TOOL_NAMES = {"run_daily_report"}
-TOOL_ROUTE_ORDER = ("retrieve", "answer", "report", "email", "daily", "tools")
-ROUTER_ROUTE_ORDER = ("delegate",)
-TOOL_ROUTE_BY_NAME = {
-    **{name: "retrieve" for name in SEARCH_TOOL_NAMES},
-    **{name: "answer" for name in ANSWER_TOOL_NAMES},
-    **{name: "report" for name in REPORT_TOOL_NAMES},
-    **{name: "email" for name in EMAIL_TOOL_NAMES},
-    **{name: "daily" for name in DAILY_TOOL_NAMES},
-}
-ALL_SPECIALIST_TOOL_NAMES = (
-    SEARCH_TOOL_NAMES
-    | ANSWER_TOOL_NAMES
-    | REPORT_TOOL_NAMES
-    | EMAIL_TOOL_NAMES
-    | DAILY_TOOL_NAMES
-    | {
-        "list_topics",
-        "upload_research_note",
-        "list_uploads",
-        "mcp_get_current_time",
-        "mcp_summarize_text_stats",
-        "mcp_extract_keywords_local",
-        "mcp_read_local_markdown_excerpt",
-        "segment_image_with_sam",
-    }
-)
-
-ROUTER_SYSTEM_PROMPT = """你是一级路由/规划 agent。
-
-你的职责：
-1. 判断用户请求应由哪个二级 agent 处理，并把必要目标、约束和上下文转交给它。
-2. 你只能使用 delegate_to_*_agent 工具；不要直接调用科研检索、报告、邮件、上传、MCP 或图像工具。
-3. 如果一个请求需要多个能力，按合理顺序委派给多个二级 agent，并基于返回结果综合回答。
-4. 不要编造工具结果；二级 agent 结果为空或报错时要说明。
-5. 简单闲聊或不需要工具的问题可以直接回答。"""
-
-SPECIALIST_SYSTEM_PROMPT_TEMPLATE = """你是{display_name}二级 agent。
-
-职责边界：
-{responsibilities}
-
-工具使用规则：
-1. 你只能使用当前绑定给你的工具，不要声称可以调用其他工具。
-2. 需要工具时主动调用工具，并基于工具结果给出简洁结论。
-3. 工具报错或结果为空时明确说明。
-4. 不要编造数据库、报告、上传文件或图像处理结果。"""
-
-
-@dataclass(frozen=True)
-class AgentToolProfile:
-    name: str
-    display_name: str
-    tool_names: frozenset[str]
-    responsibilities: str
-    delegation_description: str
-
-
-AGENT_TOOL_PROFILES: tuple[AgentToolProfile, ...] = (
-    AgentToolProfile(
-        name="research",
-        display_name="科研检索与问答",
-        tool_names=frozenset(
-            {
-                "list_topics",
-                "semantic_search_public_progress",
-                "rag_answer_public_progress",
-                "upload_research_note",
-                "list_uploads",
-                "mcp_summarize_text_stats",
-                "mcp_extract_keywords_local",
-                "mcp_read_local_markdown_excerpt",
-            }
-        ),
-        responsibilities=(
-            "- 列出研究主题、检索公共研究进展、基于 RAG 回答科研问题。\n"
-            "- 上传/登记文本研究笔记，读取上传文档或本地 markdown 摘要。\n"
-            "- 对文本做本地统计或关键词提取。"
-        ),
-        delegation_description=(
-            "Delegate research search, RAG Q&A, topic listing, upload listing, "
-            "research-note ingestion, local markdown reading, and text analysis tasks."
-        ),
-    ),
-    AgentToolProfile(
-        name="reporting",
-        display_name="日报与报告",
-        tool_names=frozenset(
-            {
-                "list_topics",
-                "run_daily_report",
-                "list_reports",
-                "get_report_content",
-                "mcp_read_local_markdown_excerpt",
-            }
-        ),
-        responsibilities=(
-            "- 生成每日 arXiv 研究报告。\n"
-            "- 列出、读取和总结已生成的日报内容。\n"
-            "- 必要时读取报告 markdown 摘要。"
-        ),
-        delegation_description=(
-            "Delegate daily arXiv report generation, report listing, report reading, "
-            "and report summarization tasks."
-        ),
-    ),
-    AgentToolProfile(
-        name="communication",
-        display_name="邮件通知",
-        tool_names=frozenset(
-            {
-                "send_markdown_email",
-                "send_report_email",
-                "send_plain_email",
-                "list_reports",
-                "get_report_content",
-            }
-        ),
-        responsibilities=(
-            "- 发送 markdown、纯文本邮件或已有日报邮件。\n"
-            "- 需要发送报告前可查询报告列表和报告内容。"
-        ),
-        delegation_description=(
-            "Delegate email sending and report-email delivery tasks, including "
-            "looking up report metadata/content when needed."
-        ),
-    ),
-    AgentToolProfile(
-        name="vision",
-        display_name="图像分割",
-        tool_names=frozenset({"segment_image_with_sam"}),
-        responsibilities=(
-            "- 对本地图片执行 SAM 目标分割、抠图、mask、框选、主体或区域提取。\n"
-            "- 输入必须包含可用的本地图片路径和自然语言分割指令。"
-        ),
-        delegation_description=(
-            "Delegate image segmentation, mask extraction, cutout, object/region "
-            "selection, and bounding-box style vision tasks."
-        ),
-    ),
-    AgentToolProfile(
-        name="utility",
-        display_name="通用本地工具",
-        tool_names=frozenset(
-            {
-                "mcp_get_current_time",
-                "mcp_summarize_text_stats",
-                "mcp_extract_keywords_local",
-                "mcp_read_local_markdown_excerpt",
-            }
-        ),
-        responsibilities=(
-            "- 获取当前时间。\n"
-            "- 做轻量文本统计、关键词提取或读取本地 markdown 摘要。"
-        ),
-        delegation_description=(
-            "Delegate lightweight local utility tasks such as current time, text "
-            "statistics, keyword extraction, and markdown excerpt reading."
-        ),
-    ),
-)
 
 
 class AgentGraphState(TypedDict, total=False):
