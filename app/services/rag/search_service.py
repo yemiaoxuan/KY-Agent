@@ -27,6 +27,7 @@ def build_rag_chain():
             ("human", "问题：{question}\n\n上下文：\n{context}\n\n请用中文回答，并引用来源编号。"),
         ]
     )
+    # documents 先转换成上下文，再进入 prompt / llm / parser，形成清晰的 Runnable 数据流。
     return (
         RunnablePassthrough.assign(
             context=lambda payload: documents_to_context(payload["documents"])

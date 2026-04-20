@@ -33,6 +33,7 @@ class ConfiguredEmbeddings(Embeddings):
 
 
 def get_configured_embeddings() -> Embeddings:
+    # 上层只依赖 LangChain Embeddings 抽象，不直接依赖具体供应商 SDK。
     return ConfiguredEmbeddings()
 
 

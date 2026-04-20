@@ -71,6 +71,7 @@ class SQLAlchemyPgVectorStore(VectorStore):
         document_metadata = kwargs.get("document_metadata") or {}
 
         vectors = self.embeddings.embed_documents(text_list) if text_list else []
+        # 自定义 VectorStore 的价值在于：保留现有表结构，同时让上层继续按 LangChain 接口工作。
         if len(vectors) != len(text_list):
             raise RuntimeError(
                 f"Embedding count mismatch: expected {len(text_list)}, got {len(vectors)}."
@@ -129,6 +130,7 @@ class SQLAlchemyPgVectorStore(VectorStore):
         document_metadata: dict | None = None,
     ) -> UploadedDocument:
         resolved_visibility = visibility or self.visibility
+        # upsert 语义按业务主键(file_path + file_type)复用已有文档，而不是重复插入文档行。
         document = (
             self.db.query(UploadedDocument)
             .filter(
@@ -253,6 +255,7 @@ class SQLAlchemyPgVectorStore(VectorStore):
         **kwargs: Any,
     ) -> list[tuple[Document, float]]:
         visibility = kwargs.get("filter", {}).get("visibility", self.visibility)
+        # 距离计算直接下推到 pgvector，LangChain 这里只负责对接 Document 抽象。
         distance = DocumentChunk.embedding.cosine_distance(embedding).label("distance")
         stmt = (
             select(DocumentChunk, UploadedDocument, distance)

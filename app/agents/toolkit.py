@@ -96,6 +96,7 @@ def _with_tool_logging(
 
 
 def _build_tool(func, *, name: str, description: str) -> StructuredTool:
+    # 所有业务工具统一在这里适配成 StructuredTool，保持业务实现与 LangChain 适配层解耦。
     return StructuredTool.from_function(
         _with_tool_logging(name, func),
         name=name,
@@ -104,6 +105,7 @@ def _build_tool(func, *, name: str, description: str) -> StructuredTool:
 
 
 def build_internal_tools(db: Session) -> list[BaseTool]:
+    # 这里的函数仍然是普通 Python 服务函数，LangChain 只负责 schema 暴露和调用编排。
     def list_topics_tool() -> list[dict[str, Any]]:
         return [_jsonable_topic(topic) for topic in list_enabled_topics(db)]
 

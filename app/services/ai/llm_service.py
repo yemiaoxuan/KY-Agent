@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 def _build_chat_llm(model_name: str) -> ChatOpenAI:
     settings = get_settings()
+    # 统一走 OpenAI-compatible 接口，便于切换镜像站或模型供应商。
     return ChatOpenAI(
         model=model_name,
         api_key=settings.llm_api_key,
@@ -94,6 +95,7 @@ arXiv 分类：{categories}
             ),
         ]
     )
+    # prompt | llm | parser 是最直接的 LangChain runnable 组合方式。
     chain = prompt | get_llm() | StrOutputParser()
     raw = chain.invoke(
         {
@@ -127,6 +129,7 @@ def summarize_paper(
     prompt_suffix: str | None = None,
 ) -> PaperSummary:
     settings = get_settings()
+    # 开发环境允许在未配置 LLM 时退化运行，先打通整个日报工作流。
     if settings.llm_api_key == "replace-me":
         return fallback_summary(paper, topic)
     try:
