@@ -10,6 +10,7 @@ from langgraph.errors import GraphRecursionError
 from sqlalchemy.orm import Session
 
 from app.agents.chat_graph import (
+    ROUTER_ROUTE_ORDER,
     TOOL_ROUTE_ORDER,
     _coerce_tool_result,
     build_agent_graph,
@@ -122,7 +123,7 @@ async def stream_agent_chat(
                                 },
                             )
                         )
-            for node_name in TOOL_ROUTE_ORDER:
+            for node_name in (*ROUTER_ROUTE_ORDER, *TOOL_ROUTE_ORDER):
                 if node_name not in update:
                     continue
                 new_messages = update[node_name].get("messages", [])
