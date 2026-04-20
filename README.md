@@ -1,5 +1,9 @@
 # KY Research Agent
 
+<p align="center">
+  <img src="./Image.png" alt="KY Research Agent architecture illustration" width="520" />
+</p>
+
 个人科研进展 Agent：每天从 arXiv 收集指定领域的新论文，生成 Markdown 简报并通过 Email 推送；同时支持上传个人研究进展到 public pgvector 向量库，用于语义检索、RAG 问答、Agent 工具调用和图像分割流程。
 
 ## 核心能力
