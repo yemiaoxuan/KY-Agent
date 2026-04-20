@@ -80,10 +80,18 @@ ky/
       deps.py
       main.py
     agents/
-      daily_research_graph.py
-      ingestion_graph.py
-      report_chain.py
-      rag_agent.py
+      core/
+        agent_prompts.py
+        context_prompts.py
+        profiles.py
+        tool_routes.py
+      graphs/
+        chat_graph.py
+        daily_research_graph.py
+        ingestion_graph.py
+        report_chain.py
+        rag_agent.py
+      toolkit.py
     core/
       config.py
       logging.py

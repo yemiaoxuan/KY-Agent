@@ -9,7 +9,7 @@ from typing import Any
 from langchain_core.tools import BaseTool, StructuredTool
 from sqlalchemy.orm import Session
 
-from app.agents.daily_research_graph import run_daily_research
+from app.agents.graphs.daily_research_graph import run_daily_research
 from app.integrations.mcp.client import call_local_mcp_tool_sync
 from app.integrations.sam3.service import SamIntegrationError, segment_image_with_sam
 from app.models.document import UploadedDocument

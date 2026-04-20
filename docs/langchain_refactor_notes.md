@@ -11,11 +11,13 @@ This project keeps the existing FastAPI interfaces stable while moving agent and
 
 ## Agent Boundaries
 
-- `app/agents/chat/graph.py` owns the LangGraph state machine, router/specialist agent orchestration, delegate tool execution, and LLM binding.
-- `app/agents/chat/context_prompts.py` owns user-session context blocks for selected topics, current uploads, and historical attachments.
-- `app/agents/chat/agent_prompts.py` owns router/specialist orchestration prompts.
-- `app/agents/chat/profiles.py` owns specialist agent profiles and tool-set ownership.
-- `app/agents/chat/tool_routes.py` owns shared tool route constants.
+- `app/agents/core/` owns reusable agent definitions that are not tied to one business graph.
+- `app/agents/core/context_prompts.py` owns user-session context blocks for selected topics, current uploads, and historical attachments.
+- `app/agents/core/agent_prompts.py` owns router/specialist orchestration prompts.
+- `app/agents/core/profiles.py` owns specialist agent profiles and tool-set ownership.
+- `app/agents/core/tool_routes.py` owns shared tool route constants.
+- `app/agents/graphs/chat_graph.py` owns the chat LangGraph state machine, router/specialist orchestration, delegate tool execution, and LLM binding.
+- `app/agents/graphs/daily_research_graph.py` owns the daily arXiv research report workflow.
 - `app/services/agent/chat_service.py` only translates API requests into LangChain messages and streams LangGraph updates as SSE events.
 - `app/agents/toolkit.py` owns tool definitions and adapts application services to LangChain `StructuredTool`.
 

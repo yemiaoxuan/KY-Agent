@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.agents.daily_research_graph import run_daily_research
+from app.agents.graphs.daily_research_graph import run_daily_research
 from app.api.deps import DbSession
 from app.schemas.report import RunDailyReportRequest
 from app.services.reporting.report_query_service import (

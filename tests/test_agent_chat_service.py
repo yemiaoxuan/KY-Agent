@@ -1,7 +1,8 @@
 from langchain_core.messages import AIMessage
 from langchain_core.tools import StructuredTool
 
-from app.agents.chat.graph import (
+from app.agents.core.profiles import AGENT_TOOL_PROFILES, ALL_SPECIALIST_TOOL_NAMES
+from app.agents.graphs.chat_graph import (
     _build_router_delegate_executor_node,
     _build_tool_executor_node,
     _prepared_tool_args,
@@ -11,7 +12,6 @@ from app.agents.chat.graph import (
     route_agent_actions,
     route_router_actions,
 )
-from app.agents.chat.profiles import AGENT_TOOL_PROFILES, ALL_SPECIALIST_TOOL_NAMES
 
 
 def test_route_agent_actions_returns_end_when_no_tool_calls() -> None:

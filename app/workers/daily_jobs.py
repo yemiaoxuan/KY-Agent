@@ -1,4 +1,4 @@
-from app.agents.daily_research_graph import run_daily_research
+from app.agents.graphs.daily_research_graph import run_daily_research
 from app.db.session import SessionLocal
 
 

@@ -8,9 +8,9 @@ from langchain_core.tools import BaseTool, StructuredTool
 from langgraph.graph import END, StateGraph, add_messages
 from sqlalchemy.orm import Session
 
-from app.agents.chat.agent_prompts import ROUTER_SYSTEM_PROMPT, SPECIALIST_SYSTEM_PROMPT_TEMPLATE
-from app.agents.chat.profiles import AGENT_TOOL_PROFILES, AgentToolProfile
-from app.agents.chat.tool_routes import (
+from app.agents.core.agent_prompts import ROUTER_SYSTEM_PROMPT, SPECIALIST_SYSTEM_PROMPT_TEMPLATE
+from app.agents.core.profiles import AGENT_TOOL_PROFILES, AgentToolProfile
+from app.agents.core.tool_routes import (
     ANSWER_TOOL_NAMES,
     ROUTER_ROUTE_ORDER,
     SEARCH_TOOL_NAMES,

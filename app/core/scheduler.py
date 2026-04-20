@@ -5,7 +5,7 @@ from pathlib import Path
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 
-from app.agents.daily_research_graph import run_daily_research
+from app.agents.graphs.daily_research_graph import run_daily_research
 from app.core.config import get_settings
 from app.db.session import SessionLocal
 from app.services.runtime.runtime_config_service import load_runtime_config

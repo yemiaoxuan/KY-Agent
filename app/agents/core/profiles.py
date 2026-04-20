@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from app.agents.chat.tool_routes import (
+from app.agents.core.tool_routes import (
     ANSWER_TOOL_NAMES,
     DAILY_TOOL_NAMES,
     EMAIL_TOOL_NAMES,
