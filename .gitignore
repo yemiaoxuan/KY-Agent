@@ -1,0 +1,17 @@
+.env
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+storage/uploads/*
+storage/reports/*
+storage/tool_logs/
+storage/sam_outputs/
+storage/*.json
+storage/*.state
+!storage/uploads/.gitkeep
+!storage/reports/.gitkeep
+postgres_data/
+*.log

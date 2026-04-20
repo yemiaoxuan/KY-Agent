@@ -1,0 +1,19 @@
+topics:
+  - name: llm_agents
+    display_name: LLM Agents
+    query: '("large language model" OR LLM) AND (agent OR agents OR multi-agent)'
+    arxiv_categories:
+      - cs.AI
+      - cs.CL
+      - cs.LG
+    include_keywords:
+      - agent
+      - multi-agent
+      - tool use
+      - planning
+      - reasoning
+    exclude_keywords:
+      - survey
+    max_results: 30
+    report_top_k: 10
+    enabled: true
